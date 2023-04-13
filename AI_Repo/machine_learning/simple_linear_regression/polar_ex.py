@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
+import polars as pl
 from sklearn.impute import SimpleImputer
 from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import plot_confusion_matrix
 import time
 
 # get the start time
@@ -14,18 +15,20 @@ st = time.time()
 # =====================================================
 # Load Data
 # =====================================================
-my_data = pd.read_csv("data/satislar.csv")
+my_data = pl.read_csv("data/satislar.csv")
 print(my_data.describe())
 
 # Get Sales and Months Columns
-sales = my_data[['Satislar']]
-months = my_data [['Aylar']]
+sales = my_data.select('Satislar')
+months = my_data.select('Aylar')
 
 print(sales)
 print(months)
 
+print(type(sales))
+
 # Split values as test and training with %33-%66 Ratio
-x_train, x_test, y_train, y_test = train_test_split(months,sales, test_size=0.33)
+x_train, x_test, y_train, y_test = train_test_split(months.to_numpy(),sales.to_numpy(), test_size=0.33)
 
 #Eğer standart scaler kullanırsak tüm değerleri aynı mertebeden görebiliriz. Zorunlu değil.
 
@@ -58,7 +61,7 @@ print(y_test)
 
 print(type(y_test))
 
-y_test_array = y_test.to_numpy()
+y_test_array = y_test
 
 print(y_test_array)
 
@@ -122,8 +125,9 @@ plt.legend(["Eğitilmiş Değerler (my_predict)","Gerçek değerler (y_test)"], 
 plt.show()
 
 # Sort ile sıralama. Linear reg için uygun grafik. Scalesiz
-x_train_sorted = x_train.sort_index()
-y_train_sorted = y_train.sort_index()
+
+x_train_sorted = x_train #
+y_train_sorted = y_train # sort lazım
 
 plt.plot(x_train_sorted,y_train_sorted)
 plt.plot(x_test,my_predict)
@@ -131,6 +135,7 @@ plt.plot(x_test,my_predict)
 plt.title("Satış vs. Aylar")
 plt.xlabel("Aylar")
 plt.ylabel("Satışlar")
+
 
 # Sort ile sıralama. Linear reg için uygun grafik. Scaleli #NOTE fix it
 #X_train_sorted = X_train.sort_index()
